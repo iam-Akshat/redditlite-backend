@@ -8,6 +8,7 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from './resolvers/book';
 const port = process.env.PORT || 3100
 import microConfig from './mikro-orm.config'
+import { PostResolver } from './resolvers/post';
 const main = async () => {
     const orm = await MikroORM.init(microConfig);
     await orm.getMigrator().up()
@@ -15,9 +16,10 @@ const main = async () => {
     const app = express();
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers:[HelloResolver],
+            resolvers:[HelloResolver, PostResolver],
             validate: false,
         }),
+        context:() => ({ em: orm.em })
     });
     
     apolloServer.applyMiddleware({ app });

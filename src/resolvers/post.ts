@@ -1,10 +1,10 @@
-import { Resolver, Query } from "type-graphql";
+import { Resolver, Query, Ctx } from "type-graphql";
 import { Post } from "../entities/Post";
-
+import { DbObjEm } from "../types"
 @Resolver()
 export class PostResolver{
     @Query(() => [Post])
-    posts() {
-        return "Hello world"
+    posts(@Ctx() {em}: DbObjEm) {   
+        return em.find(Post, {});
     }
 }
