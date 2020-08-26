@@ -6,6 +6,7 @@
   "scripts": {
     "watch": "tsc -w",
     "start": "nodemon dist/index.js",
+    "create:migrations":"mikro-orm migration:create",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
