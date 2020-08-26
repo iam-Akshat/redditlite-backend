@@ -1,7 +1,6 @@
 import { Resolver, Query, Ctx, Arg, Int, Mutation } from "type-graphql";
 import { Post } from "../entities/Post";
 import { DbObjEm } from "../types"
-import e from "express";
 @Resolver()
 export class PostResolver{
     @Query(() => [Post])
