@@ -16,11 +16,11 @@ export class User {
     @Property({ type: 'date', onUpdate: () => new Date() })
     updatedAt = new Date();
 
-    @Field()
+    @Field(() => String)
     @Property({ unique:true })
     username!: string;
 
-    @Field()
+    //@Field()
     @Property()
     password!: string;
 
