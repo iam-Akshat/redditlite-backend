@@ -8,6 +8,7 @@ import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis'
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -26,7 +27,10 @@ const main = async () => {
     await orm.getMigrator().up()
     
     const app = express(); 
-
+    app.use(cors({
+        origin:'http://localhost:3100',
+        credentials:true
+    }))
     app.use(
         session({
           name: 'qid',
@@ -51,7 +55,7 @@ const main = async () => {
         context:({req,res}):DbObjEm => ({ em: orm.em, req, res })
     });
     
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app,cors:false });
 
     app.listen(port, () => {
         console.log(`server started at ${port}`);
