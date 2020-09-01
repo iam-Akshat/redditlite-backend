@@ -33,7 +33,7 @@ class UserResponse{
 export class UserResolver{
     @Query(()=>User,{nullable:true})
     async me(
-        @Ctx() { req,res,em }: DbObjEm
+        @Ctx() { req,em }: DbObjEm
     ){
         if(!(req.session!.userId)) return null;
         const user = em.findOne(User,{id:req.session!.userId})
@@ -43,7 +43,7 @@ export class UserResolver{
    @Mutation(()=>UserResponse)
    async register(
        @Arg('options') options: UsernamePassword,
-       @Ctx() { req,res,em }: DbObjEm
+       @Ctx() { req,em }: DbObjEm
    ):Promise<UserResponse>{
     const hashedPassword = await argon2.hash(options.password)
     try {
@@ -108,10 +108,26 @@ export class UserResolver{
     if(req.session){
         req.session.userId=user.id
     }
-    
-    
     return {
         user:user
     };
+   }
+
+   @Mutation(()=>Boolean)
+   logout(
+       @Ctx() {req,res}:DbObjEm
+   ){
+       return new Promise(resolve=>{
+           res.clearCookie('qid');
+        req.session?.destroy((err)=>{
+            if(err){
+             console.log(err);
+             resolve(false)
+             return
+            }
+            resolve(true)
+        })
+       })
+       
    }
 }
