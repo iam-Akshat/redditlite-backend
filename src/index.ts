@@ -1,6 +1,5 @@
 import { MikroORM } from '@mikro-orm/core';
 import { __prod__ } from './constants'
-import { Post } from './entities/Post';
 import express, {Request,Response} from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -9,19 +8,16 @@ import session from 'express-session';
 import connectRedis from 'connect-redis'
 import dotenv from 'dotenv';
 import cors from 'cors';
-
-dotenv.config();
-
-const RedisStore = connectRedis(session)
-const redisClient = redis.createClient()
- 
-
-
 const port = process.env.PORT || 3100
 import microConfig from './mikro-orm.config'
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import { DbObjEm } from './types';
+import path from 'path';
+dotenv.config({path:path.join(__dirname, './.env')});
+
+const RedisStore = connectRedis(session)
+const redisClient = redis.createClient()
 const main = async () => {
     const orm = await MikroORM.init(microConfig);
     await orm.getMigrator().up()

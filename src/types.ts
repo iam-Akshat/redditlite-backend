@@ -5,4 +5,4 @@ export type DbObjEm = {
     em: EntityManager<IDatabaseDriver<Connection>>;
     req:Request;
     res:Response;
-}
+} 
