@@ -13,10 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mikro-orm/cli": "^4.0.0-alpha.0",
-    "@mikro-orm/core": "^4.0.0-alpha.0",
-    "@mikro-orm/migrations": "^4.0.0-alpha.0",
-    "@mikro-orm/postgresql": "^4.0.0-alpha.0",
     "apollo-server-express": "^2.16.1",
     "argon2": "^0.27.0",
     "connect-redis": "^5.0.0",

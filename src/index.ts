@@ -1,4 +1,5 @@
-import { MikroORM } from '@mikro-orm/core';
+import "reflect-metadata"
+import { createConnection } from "typeorm";
 import { __prod__ } from './constants'
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -8,18 +9,27 @@ import session from 'express-session';
 import connectRedis from 'connect-redis'
 import cors from 'cors';
 const port = process.env.PORT || 3100
-import microConfig from './mikro-orm.config'
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
 import { DbObjEm } from './types'
+import env from "./utils/loadEnv";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
 
 
 const RedisStore = connectRedis(session)
 const redis = new  Redis({})
 const main = async () => {
-    const orm = await MikroORM.init(microConfig);
-    await orm.getMigrator().up()
-    
+    const conn = await createConnection({
+        type:'postgres',
+        username:'postgres',
+        database:'lireddit2',
+        port:5432,
+        password:env.PSQL_PW,
+        entities:[User,Post],
+        logging:true,
+        synchronize:true
+    })
     const app = express(); 
     app.use(cors({
         origin:'http://localhost:3000',
@@ -36,7 +46,7 @@ const main = async () => {
               sameSite: "lax"
           },
           saveUninitialized:false,
-          secret: 'process.env.COOKIE_SECRETasstring',
+          secret: env.COOKIE_SECRET,
           resave: false,
         })
       )
@@ -46,7 +56,7 @@ const main = async () => {
             resolvers:[PostResolver, UserResolver],
             validate: false,
         }),
-        context:({req,res}):DbObjEm => ({ em: orm.em, req, res,redis })
+        context:({req,res}):DbObjEm => ({ req, res,redis })
     });
     
     apolloServer.applyMiddleware({ app,cors:false });
