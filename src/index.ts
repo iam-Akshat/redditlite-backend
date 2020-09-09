@@ -1,23 +1,21 @@
 import { MikroORM } from '@mikro-orm/core';
 import { __prod__ } from './constants'
-import express, {Request,Response} from "express";
+import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
-import redis from 'redis';
+import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis'
-import dotenv from 'dotenv';
 import cors from 'cors';
 const port = process.env.PORT || 3100
 import microConfig from './mikro-orm.config'
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
-import { DbObjEm } from './types';
-import path from 'path';
-dotenv.config({path:path.join(__dirname, './.env')});
+import { DbObjEm } from './types'
+
 
 const RedisStore = connectRedis(session)
-const redisClient = redis.createClient()
+const redis = new  Redis({})
 const main = async () => {
     const orm = await MikroORM.init(microConfig);
     await orm.getMigrator().up()
@@ -30,7 +28,7 @@ const main = async () => {
     app.use(
         session({
           name: 'qid',
-          store: new RedisStore({ client: redisClient, disableTouch:true }),
+          store: new RedisStore({ client: redis, disableTouch:true }),
           cookie:{
               maxAge: 1000*60*60*24,
               httpOnly: true,
@@ -48,7 +46,7 @@ const main = async () => {
             resolvers:[PostResolver, UserResolver],
             validate: false,
         }),
-        context:({req,res}):DbObjEm => ({ em: orm.em, req, res })
+        context:({req,res}):DbObjEm => ({ em: orm.em, req, res,redis })
     });
     
     apolloServer.applyMiddleware({ app,cors:false });
