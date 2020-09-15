@@ -20,6 +20,7 @@ import { Post } from "./entities/Post";
 const RedisStore = connectRedis(session)
 const redis = new  Redis({})
 const main = async () => {
+
     const conn = await createConnection({
         type:'postgres',
         username:'postgres',
@@ -28,8 +29,9 @@ const main = async () => {
         password:env.PSQL_PW,
         entities:[User,Post],
         logging:true,
-        synchronize:true
+        synchronize:true,
     })
+    
     const app = express(); 
     app.use(cors({
         origin:'http://localhost:3000',
