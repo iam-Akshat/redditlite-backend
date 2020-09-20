@@ -15,6 +15,7 @@ import { DbObjEm } from './types'
 import env from "./utils/loadEnv";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
+import path from "path";
 
 
 const RedisStore = connectRedis(session)
@@ -28,10 +29,11 @@ const main = async () => {
         port:5432,
         password:env.PSQL_PW,
         entities:[User,Post],
+        migrations:[path.join(__dirname,"./migrations/*")],
         logging:true,
         synchronize:true,
     })
-    
+    await conn.runMigrations()
     const app = express(); 
     app.use(cors({
         origin:'http://localhost:3000',
