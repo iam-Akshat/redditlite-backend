@@ -29,18 +29,38 @@ export class PostResolver{
     ) :Promise<PaginatedPosts> {   
         const realLimit = Math.min(limit,50);
         const realLimitPlusOne = realLimit+1;
-        const qb = getConnection()
-        .getRepository(Post)
-        .createQueryBuilder("po")
-        .orderBy('"createdAt"',"DESC")
-        .take(realLimitPlusOne);
-
+        const args:any=[realLimitPlusOne];
         if(cursor){
-            qb.where('"createdAt" < :cursor',{
-                cursor:new Date(parseInt(cursor))
-            })
+            args.push(new Date(parseInt(cursor)))
         }
-        const posts = await qb.getMany()        
+        const posts = await getConnection().query(
+            `SELECT p.*,
+            json_build_object(
+                'id',u.id,
+                'username',u.username
+            ) AS creator
+            FROM post AS p
+            INNER JOIN public.user as u
+            ON u.id=p."creatorId"
+             ${cursor?'WHERE p."createdAt" <$2':''}
+             ORDER BY p."createdAt" DESC 
+             LIMIT $1
+            `,args
+        )
+        console.log(posts.slice(0,3));
+        
+        // const qb = getConnection()
+        // .getRepository(Post)
+        // .createQueryBuilder("po")
+        // .orderBy('"createdAt"',"DESC")
+        // .take(realLimitPlusOne);
+
+        // if(cursor){
+        //     qb.where('"createdAt" < :cursor',{
+        //         cursor:
+        //     })
+        // }
+        // const posts = await qb.getMany()        
         return {
             posts:posts.slice(0, realLimit),
             hasMore:posts.length === realLimitPlusOne
@@ -53,7 +73,6 @@ export class PostResolver{
         ) : Promise<Post | undefined> {   
         return Post.findOne(id);
     }
-
     @Mutation(() => Post)
     @UseMiddleware(isAuth)
     async createPost(

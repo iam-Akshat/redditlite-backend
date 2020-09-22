@@ -1,4 +1,4 @@
-import { Resolver, Ctx, Arg, Mutation, InputType, Field, ObjectType, Query } from "type-graphql";
+import { Resolver, Ctx, Arg, Mutation, InputType, Field, ObjectType, Query, FieldResolver, Root } from "type-graphql";
 import { User } from '../entities/User'
 import { DbObjEm } from "../types"
 import argon2 from 'argon2';
@@ -36,8 +36,20 @@ class UserResponse {
     user?: User;
 
 }
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+
+    @FieldResolver(()=>String)
+    email(
+        @Root('user') user:User,
+        @Ctx(){req}:DbObjEm
+    ):string{
+        if(req.session!.userId===user.id){
+            return user.email;
+        }
+        return ""
+    }
+
     @Query(() => User, { nullable: true })
     async me(
         @Ctx() { req }: DbObjEm
