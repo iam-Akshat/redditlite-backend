@@ -16,6 +16,7 @@ import env from "./utils/loadEnv";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import path from "path";
+import { Upvote } from "./entities/Upvote";
 
 
 const RedisStore = connectRedis(session)
@@ -28,7 +29,7 @@ const main = async () => {
         database:'lireddit2',
         port:5432,
         password:env.PSQL_PW,
-        entities:[User,Post],
+        entities:[User,Post,Upvote],
         migrations:[path.join(__dirname,"./migrations/*")],
         logging:true,
         synchronize:true,
