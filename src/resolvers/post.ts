@@ -47,7 +47,7 @@ export class PostResolver{
              LIMIT $1
             `,args
         )
-        console.log(posts.slice(0,3));
+        //console.log(posts.slice(0,3));
         
         // const qb = getConnection()
         // .getRepository(Post)
@@ -108,5 +108,35 @@ export class PostResolver{
     ) : Promise<boolean>{
         await Post.delete(id)
         return true;
+    }
+
+    @UseMiddleware(isAuth)
+    @Mutation(() => Boolean )
+    async vote(
+        @Arg('postId')postId:number,
+        @Arg('value')value:number,
+        @Ctx() { req }:DbObjEm
+    ){
+        const { userId } = req.session!;
+        const isUpvote = value !== -1;
+        const realVal = isUpvote ? 1 : -1;
+        try {
+            await getConnection().query(`
+            START TRANSACTION;
+
+            INSERT INTO upvote("userId","postId","value")
+            VALUES(${userId},${postId},${realVal});
+
+            UPDATE post 
+            set votes = votes + ${realVal}
+            where id = ${postId};
+
+            COMMIT;
+        `)
+        return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
     }
 }
