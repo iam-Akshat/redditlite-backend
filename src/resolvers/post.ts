@@ -113,8 +113,8 @@ export class PostResolver{
     @UseMiddleware(isAuth)
     @Mutation(() => Boolean )
     async vote(
-        @Arg('postId')postId:number,
-        @Arg('value')value:number,
+        @Arg('postId',()=>Int)postId:number,
+        @Arg('value',()=>Int)value:number,
         @Ctx() { req }:DbObjEm
     ){
         const { userId } = req.session!;
